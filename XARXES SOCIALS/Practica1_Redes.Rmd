@@ -1,0 +1,145 @@
+---
+title: "Practica 1 Redes"
+author: "Guillermo Gavilla, Miquel Antoni Llambías Cabot"
+date: "07/11/2020"
+output: html_document
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=8, fig.height=8, fig.align="center", echo=TRUE, warning=FALSE, message=FALSE)
+library(knitr)
+library(igraph)
+```
+
+**1)** The file **facebook_sample_anon.txt** is a data table containing the list of edges of an anonymized  sample of the Facebook friendship network. Download it on your computer,  upload it to R as a dataframe, and define an undirected graph with this list of edges.
+
+*a)* Is it connected? If it is not, replace it by its largest connected component.
+
+*b)* Compute the edge density.
+
+*c)* What is the mean distance among the subjects?
+
+*d)* Calculate the list of vertices in a diameter of the graph. Plot only this path with the size of the node proportional to the degree of the node.
+
+*e)* Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
+
+*f)* Calculate a clique of  5 friends, if there is one.
+
+*h)* Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
+
+
+# Undirected Graph.
+
+```{r}
+data <- read.table("XARXESDATAFRAME.txt")
+tail(data)
+```
+
+```{r}
+datagraph1 <- graph_from_data_frame(data, directed = F)
+#plot(datagraph1)
+```
+
+# a) Is it connected? If it is not, replace it by its largest connected component.
+
+```{r}
+vertexConnectivityBool <- vertex_connectivity(datagraph1, source = NULL, target = NULL, checks = TRUE)
+```
+```{r, echo=FALSE}
+if(vertexConnectivityBool == 1) {
+  print("Graph is connected")
+} else {
+  print("Graph is not connected")
+}
+```
+
+# b) Compute the edge density
+```{r}
+density <- edge_density(datagraph1, loops = F)
+```
+```{r, echo = FALSE}
+print(paste("The edge density is", density, sep = " "))
+```
+
+# c) What is the mean distance among the subjects?
+
+```{r}
+meanDistance <- mean_distance(datagraph1, directed=F)
+```
+```{r, echo = FALSE}
+print(paste("The mean distance is", meanDistance, "nodes", sep = " "))
+```
+
+# d) Calculate the list of vertices in a diameter of the graph. Plot only this path with the size of the node proportional to the degree of the node.
+
+Calculate the proportional degree of the node and link the max weight of the linked nodes
+
+```{r}
+AddWeightsFromDegree <- function (graph) {
+  newGraph <- graph
+  for(v in V(newGraph)) {
+    degree <- degree(newGraph, v = v)[[1]]
+    for(e in E(newGraph$name == v.name)) {
+      if(e.weight != NULL || e.weight < degree) {
+        e.weight <- degree
+      }
+      print(e)
+    }
+  }
+  res <- newGraph
+}
+weightedGraph <- AddWeightsFromDegree(datagraph1)
+#weightedGraph
+```
+
+Calculate the diameter
+
+```{r}
+diameter <- diameter(weightedGraph, directed = FALSE, unconnected = FALSE, weights = NULL)
+```
+```{r, echo = FALSE}
+print(paste("The graph diameter is", diameter, "nodes", sep = " "))
+```
+# e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
+
+Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
+
+
+```{r}
+node1 <- '1000'
+node2 <- '2000'
+# compute the min distances from '1000' to all other vertices
+allShortestPathsFromNode1 <- shortest.paths(datagraph1,v=node1,weights=NULL)
+# print min distance from '1000' to '2000'
+shortestPathFromNode1ToNode2 <- allShortestPathsFromNode1[1, which(V(datagraph1)$name == node2)]
+```
+```{r, echo = FALSE}
+print(paste("The shortest path between node",  node1, "and", node2, "is", shortestPathFromNode1ToNode2, "nodes", sep = " "))
+```
+```{r}
+shortestPath <- shortest_paths(
+        datagraph1,
+        from = (V(datagraph1)$name == node1),
+        to = (V(datagraph1)$name == node2),
+        mode = c("out", "all", "in"),
+        weights = NULL,
+        output = c("vpath", "epath", "both"),
+        predecessors = FALSE,
+        inbound.edges = FALSE
+)
+list <- shortestPath[[1]]
+list
+```
+
+# f) Calculate a clique of  5 friends, if there is one.
+
+```{r}
+#shortest.paths(datagraph1, v=igraph.vs.all(datagraph1), mode = "all")
+#get.shortest.paths(datagraph1, from, mode = "all")
+#average.path.length(datagraph1, directed=FALSE, unconnected=TRUE)
+```
+
+# h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
+
+
+

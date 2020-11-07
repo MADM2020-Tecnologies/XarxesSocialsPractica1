@@ -1,0 +1,9 @@
+/.idea/
+/.Rproj.user/
+*.RData
+*.Rhistory
+*.RProj
+*.html
+*.jpeg
+*.jpg
+*.png
