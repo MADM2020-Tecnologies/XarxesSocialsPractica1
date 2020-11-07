@@ -124,7 +124,7 @@ shortestPath <- shortest_paths(
         inbound.edges = FALSE
 )
 list <- shortestPath[[1]]
-list
+list #plot this list
 ```
 
 # f) Calculate a clique of  5 friends, if there is one.
