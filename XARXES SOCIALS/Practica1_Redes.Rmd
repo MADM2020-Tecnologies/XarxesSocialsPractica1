@@ -37,7 +37,8 @@ tail(data)
 
 ```{r}
 datagraph1 <- graph_from_data_frame(data, directed = F)
-#plot(datagraph1)
+#plot(datagraph1, vertex.label.dist=10)
+#plot(datagraph1, main="social network", vertex.color="white", edge.color="grey", vertex.size=8, vertex.frame.color="yellow", vertex.label=V(datagraph1)$name)
 ```
 
 # a) Is it connected? If it is not, replace it by its largest connected component.
@@ -77,19 +78,14 @@ Calculate the proportional degree of the node and link the max weight of the lin
 ```{r}
 AddWeightsFromDegree <- function (graph) {
   newGraph <- graph
-  for(v in V(newGraph)) {
-    degree <- degree(newGraph, v = v)[[1]]
-    for(e in E(newGraph$name == v.name)) {
-      if(e.weight != NULL || e.weight < degree) {
-        e.weight <- degree
-      }
-      print(e)
-    }
-  }
+  newGraph$weights <- degree(newGraph, v = V(newGraph))
   res <- newGraph
 }
-weightedGraph <- AddWeightsFromDegree(datagraph1)
-#weightedGraph
+weightedGraph <- sample_dot_product(matrix(rnorm(200), 20, 10), directed = FALSE)
+weightedGraph <- AddWeightsFromDegree(weightedGraph)
+weightedGraph
+is_weighted(weightedGraph)
+plot(weightedGraph, main="social network", vertex.color="white", edge.color="grey", vertex.size=24, vertex.frame.color="yellow", vertex.label=V(weightedGraph)$name)
 ```
 
 Calculate the diameter
