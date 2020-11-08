@@ -1,8 +1,10 @@
 ---
-title: "Practica 1 Redes"
+title: "Handout 1"
 author: "Guillermo Gavilla, Miquel Antoni Llambías Cabot"
 date: "07/11/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r global_options, include=FALSE}
@@ -31,20 +33,27 @@ library(igraph)
 # Undirected Graph.
 
 ```{r}
-data <- read.table("XARXESDATAFRAME.txt")
+data <- read.table("facebook_sample_anon.txt")
 tail(data)
 ```
+Load data
 
 ```{r}
-datagraph1 <- graph_from_data_frame(data, directed = F)
-#plot(datagraph1, vertex.label.dist=10)
-#plot(datagraph1, main="social network", vertex.color="white", edge.color="grey", vertex.size=8, vertex.frame.color="yellow", vertex.label=V(datagraph1)$name)
+graph <- graph_from_data_frame(data, directed = F)
+#graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D,
+#                    F-G-H-I-F, J-F:G:H:I,
+#                    K-L-M-N-K, O-K:L:M:N,
+#                    P-Q-R-S-P, T-P:Q:R:S,
+#                    B-F, E-J, C-I, L-T, O-T, M-S,
+#                    C-P, C-L, I-L, I-P)
+graph <- set_graph_attr(graph, "title", "Facebook sample anon")
+#plot(graph)
 ```
 
 # a) Is it connected? If it is not, replace it by its largest connected component.
 
 ```{r}
-vertexConnectivityBool <- vertex_connectivity(datagraph1, source = NULL, target = NULL, checks = TRUE)
+vertexConnectivityBool <- vertex_connectivity(graph, source = NULL, target = NULL, checks = TRUE)
 ```
 ```{r, echo=FALSE}
 if(vertexConnectivityBool == 1) {
@@ -56,7 +65,7 @@ if(vertexConnectivityBool == 1) {
 
 # b) Compute the edge density
 ```{r}
-density <- edge_density(datagraph1, loops = F)
+density <- edge_density(graph, loops = F)
 ```
 ```{r, echo = FALSE}
 print(paste("The edge density is", density, sep = " "))
@@ -65,7 +74,7 @@ print(paste("The edge density is", density, sep = " "))
 # c) What is the mean distance among the subjects?
 
 ```{r}
-meanDistance <- mean_distance(datagraph1, directed=F)
+meanDistance <- mean_distance(graph, directed=F)
 ```
 ```{r, echo = FALSE}
 print(paste("The mean distance is", meanDistance, "nodes", sep = " "))
@@ -77,24 +86,40 @@ Calculate the proportional degree of the node and link the max weight of the lin
 
 ```{r}
 AddWeightsFromDegree <- function (graph) {
-  newGraph <- graph
-  newGraph$weights <- degree(newGraph, v = V(newGraph))
-  res <- newGraph
+  res <- graph
+  for(v in V(graph = res)$name) {
+    degree <- degree(res, v)
+    #print(paste('vertex', v, 'have a degree if', degree, sep=' '))
+    E(res) [ from(v) ]$weight <- degree
+  }
+  result <- res
 }
-weightedGraph <- sample_dot_product(matrix(rnorm(200), 20, 10), directed = FALSE)
-weightedGraph <- AddWeightsFromDegree(weightedGraph)
-weightedGraph
+is_weighted(graph)
+weightedGraph <- AddWeightsFromDegree(graph)
 is_weighted(weightedGraph)
-plot(weightedGraph, main="social network", vertex.color="white", edge.color="grey", vertex.size=24, vertex.frame.color="yellow", vertex.label=V(weightedGraph)$name)
+E(weightedGraph)[from('B')]$weight
 ```
 
 Calculate the diameter
 
 ```{r}
-diameter <- diameter(weightedGraph, directed = FALSE, unconnected = FALSE, weights = NULL)
+diameter <- diameter(weightedGraph, directed = FALSE)
+diameterNodes <- get_diameter(weightedGraph, directed = FALSE)
 ```
 ```{r, echo = FALSE}
-print(paste("The graph diameter is", diameter, "nodes", sep = " "))
+print(paste("The graph diameter is", diameter, "units", sep = " "))
+```
+```{r, echo = FALSE}
+buildAdjencyGraphFromList <- function (list) {
+  length <- length(list)
+  res <- matrix(data = 0, ncol = length, nrow = length, dimnames = list(list$name, list$name))
+  for(v in 1:length-1) {
+    res[v,v+1] <- 1
+  }
+  result <- graph.adjacency(res, mode = c('undirected'))
+}
+res <- buildAdjencyGraphFromList(diameterNodes)
+plot(res)
 ```
 # e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
 
@@ -105,7 +130,7 @@ Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
 node1 <- '1000'
 node2 <- '2000'
 # compute the min distances from '1000' to all other vertices
-allShortestPathsFromNode1 <- shortest.paths(datagraph1,v=node1,weights=NULL)
+allShortestPathsFromNode1 <- shortest.paths(graph, v=node1, weights=NULL)
 # print min distance from '1000' to '2000'
 shortestPathFromNode1ToNode2 <- allShortestPathsFromNode1[1, which(V(datagraph1)$name == node2)]
 ```
@@ -114,9 +139,9 @@ print(paste("The shortest path between node",  node1, "and", node2, "is", shorte
 ```
 ```{r}
 shortestPath <- shortest_paths(
-        datagraph1,
-        from = (V(datagraph1)$name == node1),
-        to = (V(datagraph1)$name == node2),
+        graph,
+        from = (V(graph)$name == node1),
+        to = (V(graph)$name == node2),
         mode = c("out", "all", "in"),
         weights = NULL,
         output = c("vpath", "epath", "both"),
@@ -124,15 +149,14 @@ shortestPath <- shortest_paths(
         inbound.edges = FALSE
 )
 list <- shortestPath[[1]]
-list #plot this list
+plot(list) #plot this list
 ```
 
 # f) Calculate a clique of  5 friends, if there is one.
 
 ```{r}
-#shortest.paths(datagraph1, v=igraph.vs.all(datagraph1), mode = "all")
-#get.shortest.paths(datagraph1, from, mode = "all")
-#average.path.length(datagraph1, directed=FALSE, unconnected=TRUE)
+cliquesOf5 <- cliques(graph, min = 5, max = 5)
+cliquesOf5
 ```
 
 # h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
