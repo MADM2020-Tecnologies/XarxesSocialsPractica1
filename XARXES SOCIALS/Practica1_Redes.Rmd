@@ -137,5 +137,5 @@ list #plot this list
 
 # h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
 
-
+HOLA
 
