@@ -97,7 +97,7 @@ AddWeightsFromDegree <- function (graph) {
 is_weighted(graph)
 weightedGraph <- AddWeightsFromDegree(graph)
 is_weighted(weightedGraph)
-E(weightedGraph)[from('B')]$weight
+E(weightedGraph)[from('0')]$weight
 ```
 
 Calculate the diameter
