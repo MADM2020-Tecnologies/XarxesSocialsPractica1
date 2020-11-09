@@ -39,24 +39,25 @@ tail(data)
 Load data
 
 ```{r}
-graph <- graph_from_data_frame(data, directed = F)
-#graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D,
-#                    F-G-H-I-F, J-F:G:H:I,
-#                    K-L-M-N-K, O-K:L:M:N,
-#                    P-Q-R-S-P, T-P:Q:R:S,
-#                    B-F, E-J, C-I, L-T, O-T, M-S,
-#                    C-P, C-L, I-L, I-P)
+#graph <- graph_from_data_frame(data, directed = F)
+graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D,
+                    F-G-H-I-F, J-F:G:H:I,
+                    K-L-M-N-K, O-K:L:M:N,
+                    P-Q-R-S-P, T-P:Q:R:S,
+                    B-F, E-J, C-I, L-T, O-T, M-S,
+                    C-P, C-L, I-L, I-P)
 graph <- set_graph_attr(graph, "title", "Facebook sample anon")
-#plot(graph)
+plot(graph)
 ```
 
 # a) Is it connected? If it is not, replace it by its largest connected component.
 
 ```{r}
 vertexConnectivityBool <- vertex_connectivity(graph, source = NULL, target = NULL, checks = TRUE)
+vertexConnectivityBool
 ```
 ```{r, echo=FALSE}
-if(vertexConnectivityBool == 1) {
+if(vertexConnectivityBool > 0) {
   print("Graph is connected")
 } else {
   print("Graph is not connected")
@@ -97,7 +98,7 @@ AddWeightsFromDegree <- function (graph) {
 is_weighted(graph)
 weightedGraph <- AddWeightsFromDegree(graph)
 is_weighted(weightedGraph)
-E(weightedGraph)[from('0')]$weight
+E(weightedGraph)[from(V(weightedGraph)$name[1])]$weight
 ```
 
 Calculate the diameter
@@ -116,7 +117,7 @@ buildAdjencyGraphFromList <- function (list) {
   for(v in 1:length-1) {
     res[v,v+1] <- 1
   }
-  result <- graph.adjacency(res, mode = c('undirected'))
+  result <- graph.adjacency(res, mode = 'undirected')
 }
 res <- buildAdjencyGraphFromList(diameterNodes)
 plot(res)
@@ -127,39 +128,51 @@ Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
 
 
 ```{r}
-node1 <- '1000'
-node2 <- '2000'
-# compute the min distances from '1000' to all other vertices
-allShortestPathsFromNode1 <- shortest.paths(graph, v=node1, weights=NULL)
-# print min distance from '1000' to '2000'
-shortestPathFromNode1ToNode2 <- allShortestPathsFromNode1[1, which(V(datagraph1)$name == node2)]
-```
-```{r, echo = FALSE}
-print(paste("The shortest path between node",  node1, "and", node2, "is", shortestPathFromNode1ToNode2, "nodes", sep = " "))
-```
-```{r}
-shortestPath <- shortest_paths(
+#vertex1 <- '1000'
+#vertex2 <- '2000'
+vertex1 <- 'A'
+vertex2 <- 'N'
+paintedGraf <- graph
+shortestPath <- get.shortest.paths(
         graph,
-        from = (V(graph)$name == node1),
-        to = (V(graph)$name == node2),
-        mode = c("out", "all", "in"),
+        from = V(graph)$name == vertex1,
+        to = V(graph)$name == vertex2,
         weights = NULL,
-        output = c("vpath", "epath", "both"),
+        output = "vpath",
         predecessors = FALSE,
         inbound.edges = FALSE
 )
-list <- shortestPath[[1]]
-plot(list) #plot this list
+
+E(paintedGraf, path=shortestPath$vpath[[1]])$color <- "red"
+plot(paintedGraf)
 ```
 
 # f) Calculate a clique of  5 friends, if there is one.
 
 ```{r}
 cliquesOf5 <- cliques(graph, min = 5, max = 5)
-cliquesOf5
+if(length(cliquesOf5) > 0) {
+  print(cliquesOf5)
+} else {
+  print("This graph does not feature a clique of 5")
+}
 ```
 
 # h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
 
+Get a list of degrees
+```{r}
+degrees <- degree(graph = graph)
+degrees
+```
 
 
+```{r}
+degreesOf1 <- which(degrees == 4)
+vertexNames <- names(degreesOf1)
+vertexNames
+```
+
+```{r}
+neighbors(graph = graph, v = vertexNames)
+```
