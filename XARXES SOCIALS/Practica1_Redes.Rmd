@@ -176,3 +176,153 @@ vertexNames
 ```{r}
 neighbors(graph = graph, v = vertexNames)
 ```
+
+
+
+
+
+
+#Pruebas con los MACROdatos.
+
+```{r}
+
+bigraph = graph.data.frame(data, directed = F)
+plot(bigraph)
+
+```
+# h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
+
+
+```{r}
+
+degreesbig <- degree(graph = bigraph)
+degreesbig
+
+```
+
+```{r}
+
+degrees1big <- which(degrees == 1)
+vertexNamesbig <- names(degrees1big)
+vertexNamesbig
+
+```
+
+```{r}
+
+neighbors(graph = graph, v = vertexNamesbig)
+
+```
+
+
+# a) Is it connected? If it is not, replace it by its largest connected component.
+
+```{r}
+vertexConnectivityBoolbig <- vertex_connectivity(bigraph, source = NULL, target = NULL, checks = TRUE)
+vertexConnectivityBoolbig
+```
+
+
+
+
+```{r, echo=FALSE}
+if(vertexConnectivityBoolbig > 0) {
+  print("Graph is connected")
+} else {
+  print("Graph is not connected")
+}
+```
+
+
+# b) Compute the edge density
+```{r}
+densitybig <- edge_density(bigraph, loops = F)
+```
+```{r, echo = FALSE}
+print(paste("The edge density is", densitybig, sep = " "))
+```
+
+# c) What is the mean distance among the subjects?
+
+
+
+```{r}
+meanDistancebig <- mean_distance(bigraph, directed=F)
+```
+```{r, echo = FALSE}
+print(paste("The mean distance is", meanDistancebig, "nodes", sep = " "))
+```
+
+
+
+# e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
+
+Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
+
+
+```{r}
+#vertex1 <- '1000'
+#vertex2 <- '2000'
+vertex1big <- '1000'
+vertex2big <- '2000'
+paintedGrafbig <- bigraph
+shortestPathbig <- get.shortest.paths(
+        bigraph,
+        from = V(bigraph)$name == vertex1big,
+        to = V(bigraph)$name == vertex2big,
+        weights = NULL,
+        output = "vpath",
+        predecessors = FALSE,
+        inbound.edges = FALSE
+)
+
+E(paintedGrafbig, path=shortestPathbig$vpath[[1]])$color <- "red"
+plot(paintedGrafbig)
+```
+
+
+# d) Calculate the list of vertices in a diameter of the graph. Plot only this path with the size of the node proportional to the degree of the node.
+
+Calculate the proportional degree of the node and link the max weight of the linked nodes
+
+```{r}
+AddWeightsFromDegreebig <- function (bigraph) {
+  res <- bigraph
+  for(v in V(graph = res)$name) {
+    degree <- degree(res, v)
+    #print(paste('vertex', v, 'have a degree if', degree, sep=' '))
+    E(res) [ from(v) ]$weight <- degree
+  }
+  result <- res
+}
+is_weighted(bigraph)
+weightedGraphbig <- AddWeightsFromDegreebig(bigraph)
+is_weighted(weightedGraphbig)
+E(weightedGraphbig)[from(V(weightedGraphbig)$name[1])]$weight
+```
+
+Calculate the diameter
+
+```{r}
+diameterbig <- diameter(weightedGraphbig, directed = FALSE)
+diameterNodesbig <- get_diameter(weightedGraphbig, directed = FALSE)
+```
+```{r, echo = FALSE}
+print(paste("The graph diameter is", diameterbig, "units", sep = " "))
+```
+
+```{r}
+
+buildAdjencyGraphFromList <- function (list) {
+  length <- length(list)
+  res <- matrix(data = 0, ncol = length, nrow = length, dimnames = list(list$name, list$name))
+  for(v in 1:length-1) {
+    res[v,v+1] <- 1
+  }
+  result <- graph.adjacency(res, mode = 'undirected')
+}
+res <- buildAdjencyGraphFromList(diameterNodes)
+plot(res)
+
+```
+
