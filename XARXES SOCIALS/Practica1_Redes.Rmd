@@ -2,9 +2,7 @@
 title: "Handout 1"
 author: "Guillermo Gavilla, Miquel Antoni Llambías Cabot"
 date: "07/11/2020"
-output:
-  pdf_document: default
-  html_document: default
+output:  html_document
 ---
 
 ```{r global_options, include=FALSE}
@@ -12,6 +10,8 @@ knitr::opts_chunk$set(fig.width=8, fig.height=8, fig.align="center", echo=TRUE, 
 library(knitr)
 library(igraph)
 ```
+
+# Index
 
 **1)** The file **facebook_sample_anon.txt** is a data table containing the list of edges of an anonymized  sample of the Facebook friendship network. Download it on your computer,  upload it to R as a dataframe, and define an undirected graph with this list of edges.
 
@@ -40,12 +40,11 @@ Load data
 
 ```{r}
 #graph <- graph_from_data_frame(data, directed = F)
-graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D,
-                    F-G-H-I-F, J-F:G:H:I,
-                    K-L-M-N-K, O-K:L:M:N,
-                    P-Q-R-S-P, T-P:Q:R:S,
-                    B-F, E-J, C-I, L-T, O-T, M-S,
-                    C-P, C-L, I-L, I-P)
+```
+```{r}
+graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
+V(graph = graph)["A"]$name <- "1000"
+V(graph = graph)["N"]$name <- "2000"
 graph <- set_graph_attr(graph, "title", "Facebook sample anon")
 plot(graph)
 ```
@@ -90,14 +89,11 @@ AddWeightsFromDegree <- function (graph) {
   res <- graph
   for(v in V(graph = res)$name) {
     degree <- degree(res, v)
-    #print(paste('vertex', v, 'have a degree if', degree, sep=' '))
     E(res) [ from(v) ]$weight <- degree
   }
   result <- res
 }
-is_weighted(graph)
 weightedGraph <- AddWeightsFromDegree(graph)
-is_weighted(weightedGraph)
 E(weightedGraph)[from(V(weightedGraph)$name[1])]$weight
 ```
 
@@ -122,16 +118,15 @@ buildAdjencyGraphFromList <- function (list) {
 res <- buildAdjencyGraphFromList(diameterNodes)
 plot(res)
 ```
+
 # e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
 
 Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
 
 
 ```{r}
-#vertex1 <- '1000'
-#vertex2 <- '2000'
-vertex1 <- 'A'
-vertex2 <- 'N'
+vertex1 <- '1000'
+vertex2 <- '2000'
 paintedGraf <- graph
 shortestPath <- get.shortest.paths(
         graph,
@@ -150,11 +145,20 @@ plot(paintedGraf)
 # f) Calculate a clique of  5 friends, if there is one.
 
 ```{r}
-cliquesOf5 <- cliques(graph, min = 5, max = 5)
-if(length(cliquesOf5) > 0) {
-  print(cliquesOf5)
+n <- 4
+cliquesOfN <- cliques(graph, min = n, max = n)
+```
+```{r, echo = FALSE}
+numOfCliques <- length(cliquesOfN)
+if(numOfCliques > 0) {
+  print(paste("There are", numOfCliques, "cliques of", n, "friends", sep = " "))
 } else {
-  print("This graph does not feature a clique of 5")
+  print(paste("This graph does not feature a clique of", n, "friends", sep = " "))
+}
+```
+```{r, echo = FALSE}
+if(numOfCliques > 0) {
+  print(cliquesOfN)
 }
 ```
 
@@ -165,14 +169,56 @@ Get a list of degrees
 degrees <- degree(graph = graph)
 degrees
 ```
-
-
+Get only the ones with a degree equal to `1`
 ```{r}
-degreesOf1 <- which(degrees == 4)
-vertexNames <- names(degreesOf1)
+filterEquals <- function (data, degree) {
+  res <- NULL
+  names <- data$names
+  degrees <- data$degrees
+  for(i in 1:nrow(data)) {
+    if(degrees[i] == degree) {
+      res <- append(res, names[i])
+    }
+  }
+  result <- res
+}
+
+degreesOf1 <- data.frame(degrees, names = names(degrees))
+vertexNames <- filterEquals(degreesOf1, 1)
 vertexNames
 ```
 
+Get neighbors of those degree 1 vertex
 ```{r}
-neighbors(graph = graph, v = vertexNames)
+getAllNeighbors <- function(graph, vertexNames) {
+  res <- NULL
+  for(v in vertexNames) {
+    neighborsList <- neighbors(graph, v = v)
+    for(n in names(neighborsList)) {
+      res <- append(res, n)
+    }
+  }
+  result <- res
+}
+neighborsOfDegree1 <- getAllNeighbors(graph = graph, vertexNames = vertexNames)
+neighborsOfDegree1
+```
+
+Get from neighbors those with greater degree than 1
+```{r}
+filterGreaterThan <- function (data, degree) {
+  res <- NULL
+  names <- data$names
+  degrees <- data$degrees
+  for(i in 1:nrow(data)) {
+    if(degrees[i] > degree) {
+      res <- append(res, names[i])
+    }
+  }
+  result <- res
+}
+degreesOfNeighbors <- degree(graph = graph, neighborsOfDegree1)
+degreesOfNeighborsGreaterThan1 <- filterGreaterThan(
+        data.frame(degreesOfNeighbors, names = names(degreesOfNeighbors)), 1)
+degreesOfNeighborsGreaterThan1
 ```
