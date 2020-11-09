@@ -1,5 +1,5 @@
 # Assignment 1 of Xarxes Socials i Economiques
-*By Guillermo Gavilla and y Miquel Antoni Llambías Cabot*
+*By Guillermo Gavilla and Miquel Antoni Llambías Cabot*
 
 
 ---
