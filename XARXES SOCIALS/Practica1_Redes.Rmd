@@ -39,14 +39,17 @@ tail(data)
 Load data
 
 ```{r}
-#graph <- graph_from_data_frame(data, directed = F)
+graph <- graph_from_data_frame(data, directed = F)
+plot(graph, edge.color = "darkgoldenrod1", edge.arrow.size = 0.001, edge.arrow.width = 1, 
+     vertex.color = "cyan3", vertex.label= NA,
+     vertex.size = 12, rescale = T)
 ```
 ```{r}
-graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
-V(graph = graph)["A"]$name <- "1000"
-V(graph = graph)["N"]$name <- "2000"
-graph <- set_graph_attr(graph, "title", "Facebook sample anon")
-plot(graph)
+#graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
+#V(graph = graph)["A"]$name <- "1000"
+#V(graph = graph)["N"]$name <- "2000"
+#graph <- set_graph_attr(graph, "title", "Facebook sample anon")
+#plot(graph)
 ```
 
 # a) Is it connected? If it is not, replace it by its largest connected component.
@@ -116,15 +119,18 @@ buildAdjencyGraphFromList <- function (list) {
   result <- graph.adjacency(res, mode = 'undirected')
 }
 res <- buildAdjencyGraphFromList(diameterNodes)
-plot(res)
+plot(res, edge.color = "darkgoldenrod1", edge.arrow.size = 0.01, 
+     vertex.color = "cyan3", vertex.label.color = "black",
+     vertex.size = 21, vertex.label.cex = 0.7)
 ```
 
-# e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
+# **e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.**
 
 Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
 
 
 ```{r}
+
 vertex1 <- '1000'
 vertex2 <- '2000'
 paintedGraf <- graph
@@ -138,8 +144,10 @@ shortestPath <- get.shortest.paths(
         inbound.edges = FALSE
 )
 
-E(paintedGraf, path=shortestPath$vpath[[1]])$color <- "red"
-plot(paintedGraf)
+E(paintedGraf, path=shortestPath$vpath[[1]])$color <- "darkgoldenrod1"
+plot(paintedGraf, vertex.color = "cyan3", edge.arrow.size = 5, edge.arrow.width = 5, edge.lty=c("solid"),vertex.label = NA)
+
+
 ```
 
 # f) Calculate a clique of  5 friends, if there is one.
