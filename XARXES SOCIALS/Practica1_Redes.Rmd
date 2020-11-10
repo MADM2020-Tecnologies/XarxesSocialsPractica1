@@ -40,17 +40,19 @@ tail(data)
 
 ```{r}
 graph <- graph_from_data_frame(data, directed = F)
-plot(graph, edge.color = "darkgoldenrod1", edge.arrow.size = 0.001, edge.arrow.width = 1, 
+graph <- set_graph_attr(graph, "title", "Facebook sample anon")
+plot(graph, edge.color = "darkgoldenrod1", edge.arrow.size = 0.001, edge.arrow.width = 1,
      vertex.color = "cyan3", vertex.label= NA,
      vertex.size = 12, rescale = T, main = "Undirected Graph from Facebook dataset")
 
 
 ```
+
+We used the following graph to test. This graph is just a small graph easyer to understand and easy to verify that our functions work properly.
 ```{r}
 #graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
 #V(graph = graph)["A"]$name <- "1000"
 #V(graph = graph)["N"]$name <- "2000"
-#graph <- set_graph_attr(graph, "title", "Facebook sample anon")
 #plot(graph)
 ```
 
@@ -122,8 +124,8 @@ buildAdjencyGraphFromList <- function (list) {
 }
 res <- buildAdjencyGraphFromList(diameterNodes)
 
-plot(res, edge.color = "darkgoldenrod1", edge.arrow.size = 0.01, 
-     vertex.color = "cyan3", vertex.label.color = "black",
+plot(res, edge.color = "darkgoldenrod1", edge.arrow.size = 0.01,
+     vertex.color = "cyan3", vertex.label.color = "white",
      vertex.size = 21, vertex.label.cex = 0.7, main="List of vertices in a diameter of the graph")
 ```
 
@@ -153,8 +155,9 @@ plot(paintedGraf, vertex.color = "cyan3", edge.arrow.size = 5, edge.arrow.width 
 
 # f) Calculate a clique of  5 friends, if there is one.
 
+This answer is commented cause it's high computational cost. With the provided graph `facebook_sample_anon` it would take very long to process.
 ```{r}
-#n <- 4
+#n <- 5
 #cliquesOfN <- cliques(graph, min = n, max = n)
 ```
 ```{r, echo = FALSE}
@@ -176,7 +179,7 @@ plot(paintedGraf, vertex.color = "cyan3", edge.arrow.size = 5, edge.arrow.width 
 *Get a list of degrees*
 ```{r}
 degrees <- degree(graph = graph)
-degrees
+tail(degrees)
 ```
 *Get only the ones with a degree equal to `1`*
 ```{r}
