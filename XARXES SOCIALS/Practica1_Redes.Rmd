@@ -67,6 +67,7 @@ if(vertexConnectivityBool > 0) {
 ```
 
 # b) Compute the edge density
+
 ```{r}
 density <- edge_density(graph, loops = F)
 ```
