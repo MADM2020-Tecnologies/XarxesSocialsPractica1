@@ -36,17 +36,22 @@ library(igraph)
 data <- read.table("facebook_sample_anon.txt")
 tail(data)
 ```
-Load data
+*Load data*
 
 ```{r}
-#graph <- graph_from_data_frame(data, directed = F)
+graph <- graph_from_data_frame(data, directed = F)
+plot(graph, edge.color = "darkgoldenrod1", edge.arrow.size = 0.001, edge.arrow.width = 1, 
+     vertex.color = "cyan3", vertex.label= NA,
+     vertex.size = 12, rescale = T, main = "Undirected Graph from Facebook dataset")
+
+
 ```
 ```{r}
-graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
-V(graph = graph)["A"]$name <- "1000"
-V(graph = graph)["N"]$name <- "2000"
-graph <- set_graph_attr(graph, "title", "Facebook sample anon")
-plot(graph)
+#graph <- make_graph(~ A-B-C-D-A, E-A:B:C:D, F-G-H-I-F, J-F:G:H:I, K-L-M-N-K, O-K:L:M:N, P-Q-R-S-P, T-P:Q:R:S, B-F, E-J, C-I, L-T, O-T, M-S, C-P, C-L, I-L, I-P, P-"0", "0"-"1")
+#V(graph = graph)["A"]$name <- "1000"
+#V(graph = graph)["N"]$name <- "2000"
+#graph <- set_graph_attr(graph, "title", "Facebook sample anon")
+#plot(graph)
 ```
 
 # a) Is it connected? If it is not, replace it by its largest connected component.
@@ -82,7 +87,7 @@ print(paste("The mean distance is", meanDistance, "nodes", sep = " "))
 
 # d) Calculate the list of vertices in a diameter of the graph. Plot only this path with the size of the node proportional to the degree of the node.
 
-Calculate the proportional degree of the node and link the max weight of the linked nodes
+*Calculate the proportional degree of the node and link the max weight of the linked nodes*
 
 ```{r}
 AddWeightsFromDegree <- function (graph) {
@@ -97,7 +102,7 @@ weightedGraph <- AddWeightsFromDegree(graph)
 E(weightedGraph)[from(V(weightedGraph)$name[1])]$weight
 ```
 
-Calculate the diameter
+*Calculate the diameter*
 
 ```{r}
 diameter <- diameter(weightedGraph, directed = FALSE)
@@ -116,12 +121,15 @@ buildAdjencyGraphFromList <- function (list) {
   result <- graph.adjacency(res, mode = 'undirected')
 }
 res <- buildAdjencyGraphFromList(diameterNodes)
-plot(res)
+
+plot(res, edge.color = "darkgoldenrod1", edge.arrow.size = 0.01, 
+     vertex.color = "cyan3", vertex.label.color = "black",
+     vertex.size = 21, vertex.label.cex = 0.7, main="List of vertices in a diameter of the graph")
 ```
 
 # e) Calculate the shortest path from the vertex named "1000" to the vertex named "2000" in the original file.
 
-Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.
+*Graph is connected, then it exists a path between node1 = 1000 and node2 = 2000.*
 
 
 ```{r}
@@ -138,38 +146,39 @@ shortestPath <- get.shortest.paths(
         inbound.edges = FALSE
 )
 
-E(paintedGraf, path=shortestPath$vpath[[1]])$color <- "red"
-plot(paintedGraf)
+E(paintedGraf, path=shortestPath$vpath[[1]])$color <- "darkgoldenrod1"
+plot(paintedGraf, vertex.color = "cyan3", edge.arrow.size = 5, edge.arrow.width = 5, edge.lty=c("solid"),vertex.label = NA,
+     main = "Shortest path from vertex 1000 to 2000")
 ```
 
 # f) Calculate a clique of  5 friends, if there is one.
 
 ```{r}
-n <- 4
-cliquesOfN <- cliques(graph, min = n, max = n)
+#n <- 4
+#cliquesOfN <- cliques(graph, min = n, max = n)
 ```
 ```{r, echo = FALSE}
-numOfCliques <- length(cliquesOfN)
-if(numOfCliques > 0) {
-  print(paste("There are", numOfCliques, "cliques of", n, "friends", sep = " "))
-} else {
-  print(paste("This graph does not feature a clique of", n, "friends", sep = " "))
-}
+#numOfCliques <- length(cliquesOfN)
+#if(numOfCliques > 0) {
+#  print(paste("There are", numOfCliques, "cliques of", n, "friends", sep = " "))
+#} else {
+#  print(paste("This graph does not feature a clique of", n, "friends", sep = " "))
+#}
 ```
 ```{r, echo = FALSE}
-if(numOfCliques > 0) {
-  print(cliquesOfN)
-}
+#if(numOfCliques > 0) {
+#  print(cliquesOfN)
+#}
 ```
 
 # h) Calculate the list of names of verteces that are the neigbours of verteces of degree one and that are not of degree one.
 
-Get a list of degrees
+*Get a list of degrees*
 ```{r}
 degrees <- degree(graph = graph)
 degrees
 ```
-Get only the ones with a degree equal to `1`
+*Get only the ones with a degree equal to `1`*
 ```{r}
 filterEquals <- function (data, degree) {
   res <- NULL
@@ -188,7 +197,7 @@ vertexNames <- filterEquals(degreesOf1, 1)
 vertexNames
 ```
 
-Get neighbors of those degree 1 vertex
+*Get neighbors of those degree 1 vertex*
 ```{r}
 getAllNeighbors <- function(graph, vertexNames) {
   res <- NULL
@@ -204,7 +213,7 @@ neighborsOfDegree1 <- getAllNeighbors(graph = graph, vertexNames = vertexNames)
 neighborsOfDegree1
 ```
 
-Get from neighbors those with greater degree than 1
+*Get from neighbors those with greater degree than 1*
 ```{r}
 filterGreaterThan <- function (data, degree) {
   res <- NULL
